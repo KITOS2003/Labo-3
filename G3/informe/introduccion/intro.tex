@@ -1,0 +1,98 @@
+
+
+%En un circuito de corriente alterna, el voltaje varia en función del tiempo como una función sinusoidal, o alternativamente, como la parte real de una exponencial compleja. Por ende es útil trabajar con corrientes complejas dado que la respuesta de un componente al paso de la corriente puede ser modelada con un único numero complejo que guarda información tanto de la caída neta de amplitud en el voltaje a través del componente (resistencia) como de el desfasaje que dicho componente genera, de manera que se cumple un análogo a la ley de ohm. A este numero complejo se lo llama la impedancia del componente
+
+\paragraph{}
+La tensión emitida por una fuente de corriente alterna varía en función del tiempo como una sinusoide. Alternativamente, se puede expresar como la parte real de una exponencial compleja, como muestra la expresión \eqref{eq:voltaje complejo} \cite{roederer}
+\begin{equation}\label{eq:voltaje complejo}
+    V=V_0 \ e^{j\omega t},
+\end{equation}
+donde $V_0$ es la amplitud real, $j$ es la unidad imaginaria, $\omega$ es la frecuencia y $t$ es el tiempo. La corriente, al igual que la diferencia de potencial, también se puede escribir de la misma manera, con $I_0$ siendo la amplitud.
+\paragraph{}
+La respuesta de un componente al paso de la corriente se denomina \emph{impedancia}, y esta, al igual que la corriente, se modela con números complejos. La impedancia $Z_R$ de una resistencia está dada por la expresión \eqref{eq:imp resistencia} \cite{roederer}
+\begin{equation}\label{eq:imp resistencia}
+    Z_R=R,
+\end{equation}
+donde $R$ es la resistencia. En el caso de una inductancia, la impedancia $Z_L$ esta descripta por la ecuación \eqref{eq:imp inductancia} 
+\begin{equation}\label{eq:imp inductancia}
+    Z_L = j\omega L,
+\end{equation}
+con $j$ la unidad imaginaria, $\omega$ la frecuencia y $L$ la inductancia. La impedancia $Z_C$ de una capacitancia $C$ esta dada por la ecuación \eqref{eq:imp capacitor}
+\begin{equation}\label{eq:imp capacitor}
+    Z_C = \frac{1}{j\omega C}.
+\end{equation}
+\paragraph{}
+La impedancia cumple con una relación análoga a la ley de Ohm dada por la ecuación \ref{eq:Omh},
+\begin{equation}\label{eq:Omh}
+    V = IZ ,
+\end{equation}
+donde $V$ es la caída de potencial en el componente, $Z$ es su impedancia e $I$ la corriente que circula por este. 
+\paragraph{}
+La potencia disipada por una resistencia esta dada por la expresión \eqref{eq:potencia generica}
+\begin{equation}\label{eq:potencia generica}
+    P=\frac{V_{ef}^2}{R}
+\end{equation}
+donde $V_{ef}$ es valor RMS de la tensión, es decir, $V_0/\sqrt{2}$.
+\paragraph{}
+La diferencia de fase se obtiene con la ecuación \eqref{eq:fase weak}
+\begin{equation}\label{eq:fase weak}
+    \Delta\phi(\omega) = \arctan \left( \frac{\Im V_{s}/V_{0}}{\Re V_{s}/V_{0}}\right).
+\end{equation}
+donde $V_s$ es la diferencia de potencial medida a la salida de un circuito.
+\paragraph{}
+En este trabajo, se estudió la resonancia de un circuito RLC en serie. Este circuito consiste en conectar en serie una fuente de tensión alterna, una resistencia, una inductancia y un capacitor. En este sistema, el Voltaje RMS o efectivo viene dado por la ecuación \eqref{eq:corriente serie}\cite{apunte_guia3}.
+\begin{equation}\label{eq:corriente serie}
+V_{ef}(\omega) = \frac{A}{\sqrt{\frac{1}{Q^2} + (\frac{\omega}{\omega_0} - \frac{\omega_0}{\omega})^2}}
+\end{equation}
+Esta expresión posee un máximo cuando el denominador es mínimo, es decir, cuando el término con la inductancia y la capacitancia se anulan. Esto sucede cuando la frecuencia $\omega$ toma el valor de $\omega_0$, dado por la ecuación \eqref{eq:omega0 serie}\cite{apunte_guia3}
+\begin{equation}\label{eq:omega0 serie}
+    \omega_0=1/\sqrt{LC}.
+\end{equation}
+A esta frecuencia $\omega_0$ se la denomina \emph{frecuencia de resonancia}, y determina el punto en el cual la corriente es máxima. Esta frecuencia se puede reescribir como \eqref{eq:frec angular a frec}
+\begin{equation}\label{eq:frec angular a frec}
+    f_0=\frac{\omega_0}{2\pi}.
+\end{equation}
+Cuando la frecuencia del sistema es $\omega_0$, se considera que el sistema está en \emph{resonancia}.
+\paragraph{}
+La potencia $P$ disipada por el circuito esta dada por la expresión \cite{apunte_guia3}
+\begin{equation}\label{eq:potencia serie}
+    P(\omega)=\frac{V_{ef}^2}{R^2+(\omega L-1/\omega C)^2}R.
+\end{equation}
+Esta función posee un máximo en $\omega_0$, al igual que la expresión \eqref{eq:corriente serie}, y tiene forma de campana. Ésta se denomina campana de resonancia, se caracteriza con su ancho cuando la potencia disipada es la mitad de la máxima. Esto se denomina ancho de banda ($\Delta \omega$), y cuando se reemplaza este valor de potencia en la expresión \eqref{eq:potencia serie}, se obtiene la ecuación \ref{eq:ancho de banda serie} \cite{apunte_guia3}
+\begin{equation}\label{eq:ancho de banda serie}
+    \Delta \omega=\frac{R}{L}.
+\end{equation}
+A partir de esta ecuación, se puede definir el factor de mérito del circuito, que representa selectividad del circuito para disipar la potencia en ciertas frecuencias. Este factor $Q$ está dado por la expresión \eqref{eq:Q frecuencia} \cite{apunte_guia3}
+\begin{equation}\label{eq:Q frecuencia}
+    Q=\frac{\omega_0}{\Delta \omega},
+\end{equation}
+y, reemplazando los valores de $\omega_0$ y $\Delta \omega$, se obtiene otra forma de representar este factor, descripta por la ecuación \eqref{eq:Q RLC} 
+\begin{equation}\label{eq:Q RLC}
+    Q=\frac{1}{R}\sqrt{\frac{L}{C}}\, .
+\end{equation}
+El defasaje $\Delta \phi$ de la corriente en el circuito esta descripta en la ecuación \eqref{eq:RLC-SERIE-PREDICCION-FASE}
+\begin{equation}\label{eq:RLC-SERIE-PREDICCION-FASE}
+    \Delta \phi = \arctan Q (\frac{\omega}{\omega_0}-\frac{\omega_0}{\omega}).
+\end{equation}
+\paragraph{}
+En este trabajo también se estudió la \textit{antirresonancia} de un circuito RLC paralelo. Este circuito consiste en conectar una fuente de tensión alterna al paralelo formado por un capacitor y una resonancia e inductancia conectadas en serie entre si. La impedancia total del sistema $Z_{||}$ esta dada por la ecuación \eqref{eq:imp paralelo}
+\begin{equation} \label{eq:imp paralelo}
+    Z_{||} = \frac{\left[ \frac{L}{C} - j \frac{R}{\omega C} \right] \left[ R - j(\omega L - \frac{1}{\omega C})\right]}{R^2 + (\omega L - \frac{1}{\omega C})^2}
+\end{equation}
+La frecuencia de antirresonancia del sistema esta descripta por la ecuación \eqref{eq:omega0 paralelo}
+\begin{equation}\label{eq:omega0 paralelo}
+    \omega_{0||}=\omega_0 \sqrt{1-\frac{R^2 C}{L}},
+\end{equation}
+donde $\omega_0$ es el expresado en \eqref{eq:omega0 serie}. En esta frecuencia, la impedancia del sistema es máxima, por lo que la potencia será mínima.
+\paragraph{}
+En ambos circuitos, se puede analizar la transmisión y la atenuación. La transmisión de un circuito esta dada por la ecuación \eqref{eq:transmision}
+\begin{equation}\label{eq:transmision}
+    T= \left| \frac{V_s}{V_0} \right|, 
+\end{equation}
+siendo $V_0$ el modulo de la tensión emitida por la fuente, y $V_s$ la tensión a la salida del circuito. La atenuación esta dada por la expresión \eqref{eq:atenuacion}
+\begin{equation}\label{eq:atenuacion}
+    A=-20\,\log_{10}T.
+\end{equation}
+\paragraph{}
+En este trabajo, se estudió la respuesta de circuitos RLC en serie y en paralelo a distintas frecuencias y, en particular, sus resonancias y antirresonancias respectivamente. 
+%FALTA expresion de voltaje,  

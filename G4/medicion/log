@@ -1,0 +1,5 @@
+0:00:01 ERR: THIS IS AN ERROR
+nothing happened
+0:00:03 WARN: THIS IS A WARNING
+this time something hapened
+0:00:05 MSG: Hello World

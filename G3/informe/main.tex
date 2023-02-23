@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+% \graphicspath{ {./images/} }
+\usepackage[spanish]{babel}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{biblatex}
+\usepackage[bookmarks = true, colorlinks=true, linkcolor = black, citecolor = black, menucolor = black, urlcolor = black]{hyperref} 
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{geometry}
+\usepackage{csquotes}
+\usepackage{subfiles}
+\usepackage{siunitx}
+
+%\usepackage[bookmarks = true, colorlinks=true, linkcolor = black, citecolor = black, menucolor = black, urlcolor = black]{hyperref} <---este choclazo te saca el recuadro rojo de los links
+\addbibresource{bibliografia.bib}
+
+\geometry{
+a4paper,
+total = {170mm,257mm},
+left = 22mm,
+right = 22mm,
+top = 20mm
+}
+
+\title{Estudio de la resonancia y antiresonancia de circuitos RLC}
+\author{Marcos Sidoruk \\ \href{mailto:marcsid2003@gmail.com}{marcsid2003@gmail.com} \and Gaspar Casaburi \\ \href{mailto:gaspar.casaburi@gmail.com}{gaspar.casaburi@gmail.com} \and Candelaria Rico \\ \href{mailto:canderico78@gmail.com}{canderico78@gmail.com}}
+\date{Febrero 2023}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    \subfile{Resumen/resumen.tex}
+\end{abstract}
+
+\section{Introducción}
+
+\subfile{introduccion/intro.tex}
+
+\section{Desarrollo experimental y resultados}
+\paragraph{}
+En este trabajo se estudió la resonancia de un circuito RLC en serie (\ref{sec:RLC serie}) y la antirresonancia de un circuito RLC en paralelo (\ref{sec:RLC paralelo}). Además, se graficaron los diagramas de Bode de ambos circuitos.
+\subfile{desarrollo/exp1.tex}
+\subfile{desarrollo/exp2.tex}
+
+
+\section{Conclusiones}
+
+\subfile{conclusion/conclusion.tex}
+
+%$$ A = \frac{R_0V_0}{RQ} $$
+
+%$$ V_{ef}(\omega) = \frac{R_{lim}V_0}{|R_{lim} + Z|} $$
+
+%$$ V_{ef}(\omega) = \frac{A}{\sqrt{\big(
+%B + \frac{(\frac{\omega}{\omega_0})^2}{\frac{1}{Q^2}+(\frac{\omega}{\omega_0} - \frac{\omega_0}{\omega})^2}
+%\big)^2 + \frac{1}{Q^2}\big(
+%\frac{Q^2(\frac{\omega}{\omega_0} - \frac{\omega_0}{\omega}) +  \frac{\omega_0}{\omega}}{\frac{1}{Q^2}+(\frac{\omega}{\omega_0} %- \frac{\omega_0}{\omega})^2}
+%\big)^2}} $$
+
+%$$ A = \frac{R_{lim}V_0}{R} $$
+%$$ B = \frac{R_{lim}}{R} $$
+
+%$$ \Delta\phi(\omega) = \arctan\bigg(\frac{\Im\frac{V_{medido}}{V_{emitido}}}{\Re\frac{V_{medido}}{V_{emitido}}}\bigg) $$
+
+%$$ \Delta\phi(\omega) = \arctan\bigg(\frac{1}{Q}\frac{
+%Q^2(\frac{\omega}{\omega_0} - \frac{\omega_0}{\omega}) +  \frac{\omega_0}{\omega}
+%}{
+%B(\frac{1}{Q^2} + (\frac{\omega}{\omega_0} - \frac{\omega_0}{\omega})^2) + (\frac{\omega}{\omega_0})^2
+%}\bigg)$$
+
+\printbibliography
+
+\end{document}
