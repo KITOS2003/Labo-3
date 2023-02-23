@@ -1,0 +1,72 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{manual_multimetro}{online}{}
+      \name{author}{1}{}{%
+        {{hash=2b4755d9606a9a8873bb82e9d5bdb44c}{%
+           family={Manualslib},
+           familyi={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{2b4755d9606a9a8873bb82e9d5bdb44c}
+      \strng{fullhash}{2b4755d9606a9a8873bb82e9d5bdb44c}
+      \strng{bibnamehash}{2b4755d9606a9a8873bb82e9d5bdb44c}
+      \strng{authorbibnamehash}{2b4755d9606a9a8873bb82e9d5bdb44c}
+      \strng{authornamehash}{2b4755d9606a9a8873bb82e9d5bdb44c}
+      \strng{authorfullhash}{2b4755d9606a9a8873bb82e9d5bdb44c}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{UNI-T UT55 Operating manual}
+      \verb{urlraw}
+      \verb https://www.manualslib.com/manual/538639/Uni-T-Ut51-55.html#manual
+      \endverb
+      \verb{url}
+      \verb https://www.manualslib.com/manual/538639/Uni-T-Ut51-55.html#manual
+      \endverb
+    \endentry
+    \entry{roederer}{book}{}
+      \name{author}{1}{}{%
+        {{hash=253b1311f2d36d31d75b47875f11abf3}{%
+           family={Roederer},
+           familyi={R\bibinitperiod},
+           given={Juan\bibnamedelima G.},
+           giveni={J\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \strng{namehash}{253b1311f2d36d31d75b47875f11abf3}
+      \strng{fullhash}{253b1311f2d36d31d75b47875f11abf3}
+      \strng{bibnamehash}{253b1311f2d36d31d75b47875f11abf3}
+      \strng{authorbibnamehash}{253b1311f2d36d31d75b47875f11abf3}
+      \strng{authornamehash}{253b1311f2d36d31d75b47875f11abf3}
+      \strng{authorfullhash}{253b1311f2d36d31d75b47875f11abf3}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{Segunda edición}
+      \field{title}{Electromagnetismo elemental}
+      \field{year}{2020}
+      \field{dateera}{ce}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

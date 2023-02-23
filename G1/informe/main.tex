@@ -1,0 +1,57 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{ {./images/} }
+\usepackage[spanish]{babel}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{biblatex}
+\usepackage[bookmarks = true, colorlinks=true, linkcolor = black, citecolor = black, menucolor = black, urlcolor = black]{hyperref} 
+\usepackage{multicol}
+\usepackage{geometry}
+\usepackage{csquotes}
+\usepackage{subfiles}
+%\usepackage[bookmarks = true, colorlinks=true, linkcolor = black, citecolor = black, menucolor = black, urlcolor = black]{hyperref} <---este choclazo te saca el recuadro rojo de los links
+\addbibresource{bibliografia.bib}
+
+\geometry{
+a4paper,
+total = {170mm,257mm},
+left = 22mm,
+right = 22mm,
+top = 20mm
+}
+
+\title{Determinación de las resistencias internas de diversos elementos de medición y del circuito.}
+\author{Marcos Sidoruk \\ \href{mailto:marcsid2003@gmail.com}{marcsid2003@gmail.com} \and Gaspar Casaburi \\ \href{mailto:gaspar.casaburi@gmail.com}{gaspar.casaburi@gmail.com} \and Candelaria Rico \\ \href{mailto:canderico78@gmail.com}{canderico78@gmail.com}}
+\date{Febrero 2023}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    \subfile{./Resumen/resumen.tex}
+\end{abstract}
+
+\section{Introducción}
+
+\subfile{introduccion/intro.tex}
+
+\section{Desarrollo experimental y resultados}
+
+\paragraph{}
+En estas experiencias se caracterizaron las resistencias internas del voltímetro y amperímetro del multímetro UNI-T UT55 \footnote{Para determinar los errores instrumentales se consultó el manual de usuario \cite{manual_multimetro}} (secciones \ref{sec:resistencia de volt} y \ref{sec:resistencia de amp}), la resistencia del voltímetro del osciloscopio Tektronix TBS 1052B-EDU (sección \ref{sec:resistencia de osc}) y la resistencia de la fuente Tektronix AFG1022 (sección \ref{sec:resistencia de fuente}). Las mediciones se realizaron para una determinada escala.
+
+\subfile{desarrollo/exp1.tex}
+\subfile{desarrollo/exp2.tex}
+\subfile{desarrollo/exp3.tex}
+\subfile{desarrollo/exp4.tex}
+
+\section{Conclusiones}
+
+\subfile{conclusion/conclusion.tex}
+
+\printbibliography
+
+\end{document}
