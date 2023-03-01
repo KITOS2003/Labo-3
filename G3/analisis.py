@@ -156,15 +156,19 @@ def measurement_chi2nu(x_measurement, y_measurement, f, coefs):
     return chi2/(len(ydata)-len(coefs)-1)
 
 
-def caracterize_sin(data, osc_error, fguess = 0):
+def caracterize_sin(data, osc_error, fguess=0):
     max = np.max(data[1])
-    data_errors = np.abs(np.array(data[1], dtype = float))*(3/100) + np.array([osc_error]*len(data[1]))
+    data_errors = np.abs(np.array(data[1], dtype=float)) * (3 / 100) + osc_error
     if fguess == 0:
         fourier = np.abs(fft(data[1]))
         fourier_freq = fftfreq(len(data[0]), np.mean(np.diff(data[0])))
         fguess = np.abs(fourier_freq[fourier.argmax()])
-    f = lambda t, frecuencia, fase, amplitud: amplitud*np.cos(2*np.pi*frecuencia*t + fase)
-    fit, cov = curve_fit(f, data[0], data[1], [fguess, 0, max], sigma = data_errors, absolute_sigma=True, bounds = ([4*fguess/5, -np.pi, -np.inf], [6*fguess/5, np.pi, np.inf]))
+
+    def f(t, frecuencia, fase, amplitud):
+        return amplitud * np.cos(2 * np.pi * frecuencia * t + fase)
+
+    fit, cov = curve_fit(f, data[0], data[1], [fguess, 0, max], sigma=data_errors, absolute_sigma=True,
+                         bounds=([4 * fguess / 5, -np.pi, -np.inf], [6 * fguess / 5, np.pi, np.inf]))
     r2 = calc_r2(data[0], data[1], f, fit)
     chi2nu = calc_chi2nu(data[0], data[1], data_errors, f, fit)
     if chi2nu > 5:
@@ -331,39 +335,57 @@ def rlc_serie_analisis(ch1, ch2, figdir="figures", freq_corte_campana=5000, resi
     plot_fit(freq_freq0, atenuacion, x_fit, y_fit, figdir+"/atenuacion.pdf")
 
 
-def rlc_paralelo_analisis(ch1, ch2, figdir = "figures", freq_corte_campana = 5000, resistencia_carga = 0):
+def rlc_paralelo_analisis(ch1, ch2, figdir="figures", freq_corte_campana=5000, resistencia_carga=0):
     for i, x in enumerate(ch1.frecuencia.values):
         if x > freq_corte_campana:
-            indice_corte = i-1
+            indice_corte = i - 1
             break
     # ajuste de la tension
     freq_guess = ch1.frecuencia.values[np.argmin(ch1.tension.values)]
-    freq_min = freq_guess-100
-    freq_max = freq_guess+100
-    func_aux = lambda w, w0, Q: (1/Q**2) + (w/w0-w0/w)**2
-    tension_ajuste_angular = lambda w, w0, Q, a, b: a/np.sqrt((b + (w/w0)**2/func_aux(w,w0,Q))**2 + (1/Q**2)*((Q**2*(w/w0-w0/w)+w0/w) /func_aux(w, w0, Q))**2)
-    tension_ajuste = lambda f, f0, Q, a, b: tension_ajuste_angular(2*np.pi*f, 2*np.pi*f0, Q, a, b)
-    tension_coefs, tension_cov = curve_fit(tension_ajuste, ch1.frecuencia.values[:indice_corte], ch1.tension.values[:indice_corte], [freq_guess, 20, 1, 1], sigma=ch1.tension.errors[:indice_corte], absolute_sigma=True, bounds = [(freq_min, 0, 0, 0), (freq_max, np.inf, np.inf, np.inf)])
+    freq_min = freq_guess - 100
+    freq_max = freq_guess + 100
+
+    def func_aux(w, w0, Q):
+        return (1 / Q**2) + (w / w0 - w0 / w)**2
+
+    def tension_ajuste_angular(w, w0, Q, a, b):
+        return a / np.sqrt((b + (w / w0)**2 / func_aux(w, w0, Q))**2 + (
+                           1 / Q**2) * ((Q**2 * (w / w0 - w0 / w) + w0 / w) / func_aux(w, w0, Q))**2)
+
+    def tension_ajuste(f, f0, Q, a, b):
+        return tension_ajuste_angular(2 * np.pi * f, 2 * np.pi * f0, Q, a, b)
+
+    tension_coefs, tension_cov = curve_fit(tension_ajuste,
+                                           ch1.frecuencia.values[:indice_corte], ch1.tension.values[:indice_corte],
+                                           [freq_guess, 20, 1, 1], sigma=ch1.tension.errors[:indice_corte],
+                                           bounds=[(freq_min, 0, 0, 0), (freq_max, np.inf, np.inf, np.inf)])
     freq_resonancia, factor_calidad, coef_a, coef_b = tension_coefs
     freq_resonancia_error, factor_calidad_error, coef_a_error, coef_b_error = np.sqrt(np.diag(tension_cov))
     tension_r2     = measurement_r2(ch1.frecuencia, ch1.tension, tension_ajuste, tension_coefs)
     tension_chi2nu = measurement_chi2nu(ch1.frecuencia, ch1.tension, tension_ajuste, tension_coefs)
+
     # Ajuste de la fase
-    fase_ajuste = lambda f, f0, Q, B: np.arctan((Q*(f/f0-f0/f)+(1/Q)*f0/f)/(B*(1/Q**2 + (f/f0-f0/f)**2) + (f0/f)**2))
+    def fase_ajuste(f, f0, Q, B):
+        return np.arctan((Q * (f / f0 - f0 / f) + (1 / Q) * f0 / f) / (B * (1 / Q**2 + (f / f0 - f0 / f)**2) + (f0 / f)**2))
+
     fase_coefs = freq_resonancia, factor_calidad, coef_b
     # Reportar valores
-    print("Valor de  la frecuencia de resonancia %f+-%f Hz"%(freq_resonancia, freq_resonancia_error))
-    print("Valor del factor de calidad %f+-%f"%(factor_calidad, factor_calidad_error))
+    print("Valor de  la frecuencia de resonancia %f+-%f Hz" % (freq_resonancia, freq_resonancia_error))
+    print("Valor del factor de calidad %f+-%f" % (factor_calidad, factor_calidad_error))
     # print("Valor del coeficiente A %f+-%f V"%(coef_a, coef_a_error))
-    print("Valor del coeficiente B %f+-%f V"%(coef_b, coef_b_error))
-    print("Valor del R2 del ajuste de la tension %f"%(tension_r2))
-    print("Valor del chi2nu del ajuste de la tension %f"%(tension_chi2nu))
+    print("Valor del coeficiente B %f+-%f V" % (coef_b, coef_b_error))
+    print("Valor del R2 del ajuste de la tension %f" % (tension_r2))
+    print("Valor del chi2nu del ajuste de la tension %f" % (tension_chi2nu))
     print("--------------------------------------------------------------------------------------")
     freq_freq0 = measurement()
     freq_freq0.values = ch1.frecuencia.values / freq_resonancia
     freq_freq0.errors = ch1.frecuencia.errors / freq_resonancia
-    f_aux1 = lambda freq_freq0: tension_ajuste(freq_freq0 * freq_resonancia, *tension_coefs)
-    f_aux2 = lambda freq_freq0: fase_ajuste(freq_freq0 * freq_resonancia, *fase_coefs)
+
+    def f_aux1(freq_freq0):
+        tension_ajuste(freq_freq0 * freq_resonancia, *tension_coefs)
+
+    def f_aux2(freq_freq0):
+        fase_ajuste(freq_freq0 * freq_resonancia, *fase_coefs)
     # Campana de la tension
     x_fit = np.linspace(freq_freq0.values[0], freq_freq0.values[indice_corte], 1000)
     y_fit = [f_aux1(x) for x in x_fit]

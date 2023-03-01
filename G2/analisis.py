@@ -10,7 +10,7 @@ import os
 from scipy.optimize import curve_fit
 
 sb.set_theme()
-datasets_ls = os.listdir("data")
+
 
 voltajes1 = []
 fases1 = []
@@ -22,7 +22,7 @@ voltajes_err2 = []
 fases_err2 = []
 frecuencias = []
 frecuencias_err = []
-for dataset in datasets_ls:
+for dataset in os.listdir("data"):
     frequency = float(dataset)
     ch1 = pd.read_csv("data/" + dataset + "/F0000CH1.CSV").values[17:].transpose()[3:-1]
     ch2 = pd.read_csv("data/" + dataset + "/F0000CH2.CSV").values[17:].transpose()[3:-1]
@@ -57,7 +57,7 @@ for dataset in datasets_ls:
     plt.plot(x_fit, y_fit1)
     plt.plot(x_fit, y_fit2)
     plt.plot(ch2[0], ch2[1])
-    plt.savefig("figures/%fHz.png"%(frequency))
+    plt.savefig("figures/{}Hz.png".format(frequency))
     plt.clf()
     voltajes1.append(fit1[1])
     voltajes_err1.append(error1[1])

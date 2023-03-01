@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sb
 import pyvisa as pv
 import os
 
@@ -9,7 +8,8 @@ from colorama import Fore, Back, Style
 import time
 import datetime
 
-sb.set_theme()
+class InstrumentException(Exception):
+    pass
 
 def assert_ch(channel):
     assert channel in (1, 2), "No existe el canal {}".format(channel)
@@ -103,7 +103,7 @@ class Osciloscope:
         except:
             self._logger.error("Conexion con el osciloscopio fallida", "Nombre del instrumento: {}".format(self._name))
             return None
-        finally:
+        else:
             self._idn = self._inst.query("*IDN?")
             self.osc.write('DAT:ENC RPB')
             self.osc.write('DAT:WID 1')
@@ -112,21 +112,24 @@ class Osciloscope:
             self.current_voltaje_scale = [ None, 0, 0 ]
             self.current_voltaje_offset = [ None, 0, 0 ]
             self.current_channel_enabled = [ None, False, False ]
-            self.curent_average_sample_number = 1
+            self.current_average_sample_number = 1
+            for i in [1, 2]:
+                self._inst.write("CH{}:PROB 1".format(i))
+                self._inst.write("CH{}:INV OFF".format(i))
             self.update_state()
             self._logger.success("Conexion con el osciloscopio exitosa", "Conectado con el dispositivo {}\nIdentificacion: {}".format(self._name, self._idn))
     
-    def __str__(self):
+    def __str__(self, error_msg):
         print(self._name + "\n" + self._idn)
 
     def error_check(self):
         error = int(self._inst.query("*ESR?"))
         error = unpack_8bit(error_list)[2:6]
         if any(error) == True:
+            self._logger.error(self._name+" "+error_msg, "")
             error_msg = self._inst.query("ALLEV?")
-            self._logger.error("ERROR DEL OSCILOSCOPIO", error_msg)
-            return True
-        return False
+            self._logger.error("LOG DEL OSCILOSCOPIO:", error_msg)
+            raise InstrumentException()
 
     def update_state(self):
         """Obtener la configuracion actual del osciloscopio y actualizar las variables internas"""
@@ -141,12 +144,12 @@ class Osciloscope:
                 self.current_channel_enabled[i] = False
         mode = self._inst.query("ACQ:MODE?")
         if mode == "SAMPLE":
-            self.curent_average_sample_number = 1
+            self.current_average_sample_number = 1
         elif mode == "AVERAGE":
-            self.curent_average_sample_number = int(self._inst.query("ACQ:NUMAVG?"))
+            self.current_average_sample_number = int(self._inst.query("ACQ:NUMAVG?"))
         else:
-            raise "El osciloscopio se encuentra en modo raro"
-        self.error_check()
+            raise InstrumentException("El osciloscopio se encuentra en modo raro")
+        self.error_check("Error al leer el estado del osciloscopio")
 
     def toggle_channel(channel, on_off):
         if on_off == True or on_off == "on":
@@ -156,11 +159,13 @@ class Osciloscope:
             cmd_str="OFF"
             state = False
         self._inst.write("SELECT:CH{} {}".format(channel, cmd_str))
-        if self.error_check():
-            self._logger.error("Error al cambiar el estado del canal {} del osciloscopio {} a \"{}\"".format(channel, self._name, cmd_str), "")
+        try:
+            self.error_check("Error al cambiar el estado del canal {} del osciloscopio a \"{}\"".format(channel, cmd_str))
+        except:
+            raise InstrumentException()
         else:
             self.current_channel_enabled[channel] = state
-            self._logger.msg("Estado del canal {} del osciloscopio {} cambiado a \"{}\"".format(channel, self._name, cmd_str))
+            self._logger.msg("{} Estado del canal {} del osciloscopio cambiado a \"{}\"".format(self._name, channel, cmd_str))
 
     def set_average(self, avg_number):
         possible_average_numbers = [ 1, 4, 16, 64, 128 ]
@@ -170,23 +175,42 @@ class Osciloscope:
         else:
             self._inst.write("ACQ:MODE:AVERAGE")
             self._inst.write("ACQ:NUMAVG {}".format(avg_number))
-        if self.error_check() == True:
-            self._logger.error("Error al cambiar el numero de samples a promediar", "")
+        try: 
+            self.error_check("Error al cambiar el numero de samples a promediar")
+        except:
+            raise InstrumentException()
         else:
-            self.curent_average_sample_number = avg_number
+            self.current_average_sample_number = avg_number
             self._logger.msg("Numero de samples a promediar fijado en {}".format(avg_number))
     
+    def set_trigger_source(self, channel):
+        assert_ch(channel)
+        self._inst.write("TRIG:MAI:EDGE:SOU CH{}".format(channel))
+
+    def set_trigger_slope(self, raise_fall):
+        if raise_fall in ("raise", True, 1):
+            str = "raise"
+        elif raise_fall in ("fall", False, 0):
+            str = "fall"
+        else:
+            self._logger.error("{} Error al cambiar la pendiente del trigger".format(self._name), "\"{}\" no es un parametro valido, los parametros validos son \"raise\" y \"fall\"".format(raise_fall))
+            return
+        self._inst.write("TRIG:MAI:EDGE:SLO {}".format(str))
+        self.error_check("Error al cambiar la pendiente del trigger")
+
     def set_time_scale(self, scale, index_input = False):
         if index_input:
             scale = self.possible_time_scales[scale]
         else:
             scale = find_closest(self.possible_time_scales, scale)
         self._inst.write("HOR:MAI:SCA {}".format(scale))
-        if self.error_check():
-            self._logger.error("Error al cambiar la escala de tiempo del osciloscopio", "")
+        try: 
+            self.error_check("Error al cambiar la escala de tiempo del osciloscopio")
+        except:
+            raise InstrumentException()
         else:
             self.current_time_scale = scale
-            self._logger.message("Escala temporal del osciloscopio fijada en {}".format(scale))
+            self._logger.message("{} Escala temporal del osciloscopio fijada en {}".format(self._name, scale))
 
     def set_time_offset(self, offset):
         self._inst.write("HOR:MAI:SCA {}".format(offset))
@@ -235,6 +259,7 @@ class Osciloscope:
                 break
         os.mkdir(dir_path)
         plt.figure(1)
+        plt.grid("on")
         plt.xlabel("Tiempo [s]")
         plt.ylabel("Tension [V]")
         with open(dir_path+"config", "w") as file:
@@ -276,7 +301,7 @@ class Osciloscope:
                 plt.clf()
             except:
                 self._logger.error("Medicion fallida", "")
-            finally:
+            else:
                 self._logger.success("Medicion exitosa", "Datos guardados en {}".format(dir_path))
 
 
@@ -296,7 +321,7 @@ class FunctionGenerator:
         except:
             self._logger.error("Conexion con el generador de funciones fallida", "nombre del instrumento {}".format(resource_name))
             return None
-        finally:
+        else:
             self._logger.success("Conexion con el generador de funciones establecida", "nombre del instrumento {}".format(resource_name))
         self._idn = self._inst.query("*IDN?")
         self.current_shape = [ None, "", "" ]
@@ -342,4 +367,5 @@ class FunctionGenerator:
         self._logger.message("{} Estado del canal {} fijado a {}".format(self._name, channel, on_off))
 
 rm = pv.ResourceManager()
-osc = Osciloscope(rm, "INSTR")
+osc = Osciloscope(rm, "ASRL3:")
+
