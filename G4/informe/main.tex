@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[spanish]{babel}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{biblatex}
+\usepackage[bookmarks = true, colorlinks=true, linkcolor = black, citecolor = black, menucolor = black, urlcolor = black]{hyperref} 
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{geometry}
+\usepackage{csquotes}
+\usepackage{subfiles}
+\usepackage[separate-uncertainty=true]{siunitx}
+
+\addbibresource{bibliografia.bib}
+
+\geometry{
+a4paper,
+total = {170mm,257mm},
+left = 22mm,
+right = 22mm,
+top = 20mm
+}
+
+\title{Caracterización del régimen transitorio en circuitos RC, RL y RLC}
+\author{Marcos Sidoruk \\ \href{mailto:marcsid2003@gmail.com}{marcsid2003@gmail.com} \and Gaspar Casaburi \\ \href{mailto:gaspar.casaburi@gmail.com}{gaspar.casaburi@gmail.com} \and Candelaria Rico \\ \href{mailto:canderico78@gmail.com}{canderico78@gmail.com}}
+\date{Febrero 2023}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    \subfile{0.Abstract/Abstract.tex}
+\end{abstract}
+
+\section{Introducción}
+\subfile{1.Introduccion/Introduccion.tex}
+
+\section{Desarrollo experimental y Resultados}
+En este trabajo se estudiaron los regímenes transitorios de circuitos RC (sección \ref{sec: RC}), RL (sección \ref{sec: RL}) y RLC (sección \ref{sec: RLC}). Se utilizaron un generador de funciones Tektronix AFG1022 \cite{manual_generador} y un osciloscopio Tektronix TBS 1052B-EDU \cite{manual_osciloscopio}. Todas las resistencias fueron medidas con un óhmetro modelo UNI-T UT55\cite{manual_multimetro}, y las capacitancias e inductancias fueron medidas con un multímetro Extech LCR Meter \cite{manual_extech}.
+\subfile{2.Desarrollo/RC.tex}
+\subfile{2.Desarrollo/RL.tex}
+\subfile{2.Desarrollo/RLC.tex}
+\section{Conclusión}
+\subfile{3.Conclusiones/Conclusiones.tex}
+
+\printbibliography
+
+\end{document}

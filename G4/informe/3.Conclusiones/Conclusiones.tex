@@ -1,0 +1,24 @@
+\paragraph{}
+En este trabajo se estudió el régimen transitorio de circuitos RC, RL y RLC. Para esto, se alimentaron los circuitos con una fuente de ondas cuadradas y se registró la caída de tensión en la resistencia en cada circuito.
+\paragraph{}
+En el circuito RC, se realizó un barrido de resistencias y se estudió la relación entre los tiempos característicos obtenidos y las resistencias utilizadas. El tiempo característico encontrado con $R=\SI{316.2(0.6)e4}{\Omega}$ es $\tau_1=\SI{1.311(0.003)}{s}$. Con este valor de $\tau_1$ y la ecuación \eqref{eqn:tau 1}, se calculó $C=\SI{4.1(0.2)e-7}{F}$, la cual presenta diferencias significativas con la capacidad medida de forma independiente. Además, los valores de $\tau_1$ no presentan una relación lineal con los valores de $R$. Esto lleva a la conclusión de que el modelo no describe correctamente el circuito armado posiblemente debido a una falta de consideracion con respecto a parámetros relevantes del mismo. En cuanto a la validez del modelo dada una correcto aislamiento de dichos parámetros no se puede concluir nada.
+\paragraph{}
+En el circuito RL, también se realizó un barrido de resistencias para estudiar la relación dada por \eqref{eqn:tau 2}. En este caso, se realizó un ajuste lineal de $1/\tau_2$ en función de $R$ con la ecuación \eqref{eqn:tau 2}. Así que se puede afirmar que el modelo dado por \eqref{eqn:tau 2} describe correctamente los datos. Además, se calculó con la pendiente un valor de $L=\SI{989(2)e-3}{H}$, lo cual coincide con el valor medido previamente. 
+\paragraph{}
+En el circuito RLC, se realizaron mediciones de la tensión en función del tiempo, y se encontraron en cada caso los valores de $C$ y $L$ esperados. 
+
+% $C=\SI{9.39(0.07)e-9}{F}$
+% $L=\SI{999(9)e-3}{H}$
+% $V_0=\SI{4.96(0.15)}{V}$
+
+% $R_{sobre}=\SI{30.37(0.03)e3}{\Omega}$
+
+Particularmente en el caso \textcolor{red}{En cual?} $L = \SI{1.18(0.02)}{H}$, $R = \SI{30.5(0.5)e3}{\Omega}$ y $C = \SI{9.4(0.4)e-9}{F}$, lo cual es consistente con lo medido independientemente para la inductancia, resistencia y capacitancia.
+
+% $R_1=\SI{1365(2)}{\Omega}$ y $R_2=\SI{866(2)}{\Omega}$
+
+En el caso \textcolor{red}{Cual?} se midió $L = \SI{1.0(0.2)}{H}$, una $C = \SI{10(2)e-9}{F}$ y un $\omega = \SI{1.00(2)e4}{\frac{rad}{s}}$. Devuelta, los valores no difieren significativamente con los anteriores.
+
+Luego en el caso \textcolor{red}{Cual?} los valores medidos fueron $L = \SI{1.0(0.3)}{H}$, una $C = \SI{10(3)e-9}{F}$.
+
+Esto y el hecho de que los ajustes representan bien los datos para varios valores de $R$ nos lleva a pensar que el modelo es el correcto para describir este fenómeno. Sin embargo, Para resistencias que se aproximan al orden de los M$\Omega$ se detecto una desviación significativa con el modelo. No se pudo determinar exactamente su naturaleza aunque se cree que se debe enteramente al equipo de medición usado. 
