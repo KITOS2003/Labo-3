@@ -1,13 +1,12 @@
+import os
+from functools import cache
+
 import numpy as np
-import scipy as sc
-import scipy.signal as sig
 import matplotlib.pyplot as plt
 import seaborn as sb
 import pandas as pd
 
 from prettytable import PrettyTable
-
-import os
 
 from scipy.optimize import curve_fit
 from scipy.fft import fft, fftfreq
@@ -25,7 +24,7 @@ class measurement:
             measurement_list = list(zip(*measurement_list))
             self.values = measurement_list[0]
             self.errors = measurement_list[1]
-    
+
     def __getitem__(self, i):
         if isinstance(i, slice):
             result = measurement()
@@ -33,31 +32,33 @@ class measurement:
             result.errors = self.errors[i]
             return result
         return self.values[i], self.errors[i]
-    
+
     def __add__(self, x):
         result = measurement()
         result.values = (np.array(self.values) + np.array(x.values)).tolist()
         result.errors = np.sqrt(np.array(self.errors)**2 + np.array(x.errors)**2).tolist()
         return result
-    
+
     def __sub__(self, x):
         result = measurement()
         result.values = (np.array(self.values) - np.array(x.values)).tolist()
         result.errors = np.sqrt(np.array(self.errors)**2 + np.array(x.errors)**2).tolist()
         return result
-    
+
     def __mul__(self, x):
         result = measurement()
         result.values = (np.array(self.values) * np.array(x.values)).tolist()
-        result.errors = np.sqrt((np.array(x.values)*np.array(self.errors))**2 + (np.array(self.values)*np.array(x.values))**2).tolist()
+        result.errors = np.sqrt((np.array(x.values) * np.array(self.errors))**2 + (
+                                np.array(self.values) * np.array(x.values))**2).tolist()
         return result
-    
+
     def __truediv__(self, x):
         result = measurement()
         result.values = (np.array(self.values) / np.array(x.values)).tolist()
-        result.errors = np.sqrt((np.array(self.errors)/np.array(x.values))**2 + (np.array(self.values)*np.array(x.errors)/np.array(x.values)**2)**2).tolist()
+        result.errors = np.sqrt((np.array(self.errors) / np.array(x.values))**2 + (
+                                np.array(self.values) * np.array(x.errors) / np.array(x.values)**2)**2).tolist()
         return result
-    
+
     def pow(self, x):
         result = measurement()
         a = np.array(self.values)
@@ -65,44 +66,46 @@ class measurement:
         da = np.array(self.errors)
         db = np.array(x.errors)
         result.values = (a**b).tolist()
-        result.errors = np.sqrt( (b*a**(b-np.array([1]*len(b)))*da)**2 + (np.log(a)*(a**b)*db)**2 ).tolist()
+        result.errors = np.sqrt((b * a**(b - np.array([1] * len(b))) * da)**2 + (np.log(a) * (a**b) * db)**2 ).tolist()
         return result
-    
+
     def append(self, value, error):
         self.values.append(value)
         self.errors.append(error)
-    
+
     def sort(self):
         dic = dict(zip(self.values, self.errors))
         self.values.sort()
         self.errors = [dic[x] for x in self.values]
-    
+
     def plot(measurement1, measurement2):
-        plt.errorbar(measurement1.values, measurement2.values, measurement2.errors, measurement1.errors, ".", color = "orange", ecolor = "orange")
+        plt.errorbar(measurement1.values, measurement2.values, measurement2.errors, measurement1.errors, ".", color="orange", ecolor="orange")
 
 
 class dataset:
-    
+
     def __init__(self):
-        self.frecuencia = measurement()      
-        self.fase =       measurement()      
-        self.tension =   measurement()      
+        self.frecuencia = measurement()
+        self.fase = measurement()
+        self.tension = measurement()
         self.dirnum = []
         self.r2 = []
         self.chi2nu = []
-    
+
     def append(self, measurements):
         self.frecuencia.append(measurements[0], measurements[1])
         self.fase.append(measurements[2], measurements[3])
         self.tension.append(measurements[4], measurements[5])
-    
+
     def print_table(self):
         table = PrettyTable()
         table.field_names = ["Set de datos", "frecuencia [Hz]", "fase [rad]", "tension [V]", "r2", "chi2nu"]
         for i in range(len(self.frecuencia.values)):
-            table.add_row(["%sCH1"%(self.dirnum[i]), "%f+-%f"%self.frecuencia[i], "%f+-%f"%self.fase[i], "%f+-%f"%self.tension[i], self.r2[i], self.chi2nu[i]])
+            table.add_row(["%sCH1" % (self.dirnum[i]), "%f+-%f" % self.frecuencia[i],
+                           "%f+-%f" % self.fase[i], "%f+-%f" % self.tension[i],
+                           self.r2[i], self.chi2nu[i]])
         print(table)
-    
+
     def adjust(self):
         # ordenar los datos
         aux = list(zip(self.fase, self.tension, self.dirnum))
@@ -114,10 +117,10 @@ class dataset:
         self.tension = measurement(aux[1])
         self.dirnum = list(aux[2])
         # convertir a rms
-        self.tension.values = (np.abs(np.array(self.tension.values))/np.sqrt(2)).tolist()
-        self.tension.errors = (np.array(self.tension.errors)/np.sqrt(2)).tolist()
+        self.tension.values = (np.abs(np.array(self.tension.values)) / np.sqrt(2)).tolist()
+        self.tension.errors = (np.array(self.tension.errors) / np.sqrt(2)).tolist()
         # arreglar la fase
-        self.fase.values = np.unwrap(self.fase.values, period = np.pi)
+        self.fase.values = np.unwrap(self.fase.values, period=np.pi)
 
 
 def mkdir_noexcept(dir_name):
@@ -128,23 +131,23 @@ def mkdir_noexcept(dir_name):
 
 
 def calc_r2(xdata, ydata, f, coefs):
-    residuos = np.array(ydata)-np.array([f(x, *coefs) for x in xdata])
-    total    = np.array(ydata)-np.array([np.mean(ydata)]*len(ydata)) 
-    return 1-np.sum(residuos**2)/np.sum(total**2)
+    residuos = np.array(ydata) - np.array([f(x, *coefs) for x in xdata])
+    total    = np.array(ydata) - np.array([np.mean(ydata)] * len(ydata))
+    return 1 - np.sum(residuos**2) / np.sum(total**2)
 
 
 def calc_chi2nu(xdata, ydata, yerror, f, coefs):
-    residuos = np.array(ydata)-np.array([f(x, *coefs) for x in xdata])
-    chi2 = np.sum((residuos/np.array(yerror))**2)
-    return chi2/(len(ydata)-len(coefs)-1)
+    residuos = np.array(ydata) - np.array([f(x, *coefs) for x in xdata])
+    chi2 = np.sum((residuos / np.array(yerror))**2)
+    return chi2 / (len(ydata) - len(coefs) - 1)
 
 
 def measurement_r2(x_measurement, y_measurement, f, coefs):
     xdata = x_measurement.values
     ydata = y_measurement.values
-    residuos = np.array(ydata)-np.array([f(x, *coefs) for x in xdata])
-    total    = np.array(ydata)-np.array([np.mean(ydata)]*len(ydata)) 
-    return 1-np.sum(residuos**2)/np.sum(total**2)
+    residuos = np.array(ydata) - np.array([f(x, *coefs) for x in xdata])
+    total    = np.array(ydata) - np.array([np.mean(ydata)] * len(ydata))
+    return 1 - np.sum(residuos**2) / np.sum(total**2)
 
 
 def measurement_chi2nu(x_measurement, y_measurement, f, coefs):
@@ -154,7 +157,6 @@ def measurement_chi2nu(x_measurement, y_measurement, f, coefs):
     residuos = np.array(ydata)-np.array([f(x, *coefs) for x in xdata])
     chi2 = np.sum((residuos/np.array(yerror))**2)
     return chi2/(len(ydata)-len(coefs)-1)
-
 
 def caracterize_sin(data, osc_error, fguess=0):
     max = np.max(data[1])
@@ -176,12 +178,11 @@ def caracterize_sin(data, osc_error, fguess=0):
     errors = np.sqrt(np.diag(cov))
     x_fit = np.linspace(data[0][0], data[0][-1], 1000)
     y_fit = [f(t, fit[0], fit[1], fit[2]) for t in x_fit]
-    plt.xlabel("Frecuencia estimada: %f Hz"%(fguess))
-    plt.ylabel("Amplitud %f V"%(fit[2]))
+    plt.xlabel("Frecuencia estimada: %f Hz" % (fguess))
+    plt.ylabel("Amplitud %f V" % (fit[2]))
     plt.plot(x_fit, y_fit)
     plt.errorbar(data[0], data[1], data_errors, 0, ".")
     return fit[0], errors[0], fit[1], errors[1], fit[2], errors[2], fguess, r2, chi2nu
-
 
 def get_osciloscope_error(config, channel):
     aux = config[config.find(channel):]
@@ -190,25 +191,24 @@ def get_osciloscope_error(config, channel):
     aux = aux.replace("SCALE ", "")
     base = float(aux[:aux.find("E")])
     exp = float(aux[aux.find("E"):].replace("E", ""))
-    scale = base*10**exp
-    return 8*scale/255
-
+    scale = base * 10**exp
+    return 8 * scale / 255
 
 def analisis_datos_osclioscopio(datadir_path, figdir, freq_corte_campana=3000):
     mkdir_noexcept(figdir)
-    mkdir_noexcept(figdir+"/osciloscopio")
+    mkdir_noexcept(figdir + "/osciloscopio")
     sets_descartados = []
     datadir_ls = os.listdir(datadir_path)
     dataset_ch1 = dataset()
     dataset_ch2 = dataset()
     for i, dir in enumerate(datadir_ls):
         dir_num = dir.replace("ALL", "")
-        ch1 = pd.read_csv(datadir_path+"/"+dir+"/F%sCH1.CSV"%(dir_num)).values[17:].transpose()[3:-1]
-        ch2 = pd.read_csv(datadir_path+"/"+dir+"/F%sCH2.CSV"%(dir_num)).values[17:].transpose()[3:-1]
-        with open(datadir_path+"/"+dir+"/F%sTEK.SET"%(dir_num), "r") as file:
+        ch1 = pd.read_csv(datadir_path + "/" + dir + "/F%sCH1.CSV" % (dir_num)).values[17:].transpose()[3:-1]
+        ch2 = pd.read_csv(datadir_path + "/" + dir + "/F%sCH2.CSV" % (dir_num)).values[17:].transpose()[3:-1]
+        with open(datadir_path + "/" + dir + "/F%sTEK.SET" % (dir_num), "r") as file:
             config = file.read()
-        ch1_error=get_osciloscope_error(config, "CH1")
-        ch2_error=get_osciloscope_error(config, "CH2")
+        ch1_error = get_osciloscope_error(config, "CH1")
+        ch2_error = get_osciloscope_error(config, "CH2")
         plt.figure(1)
         try:
             aux2 = caracterize_sin(ch2, ch2_error)
@@ -243,7 +243,7 @@ def plot_fit(measurement1, measurement2, x_fit, y_fit, out_name):
     plt.clf()
 
 
-def calc_potencia(tension, resistencia_carga):   
+def calc_potencia(tension, resistencia_carga):
     potencia = np.array(tension.values)**2/resistencia_carga
     potencia_error = np.sqrt(((2*np.array(tension.values))/resistencia_carga * np.array(tension.errors))**2 + ((np.array(tension.values)/resistencia_carga)**2 * 0.1)**2 ) 
     return measurement(zip(potencia, potencia_error))
@@ -274,65 +274,77 @@ def rlc_serie_analisis(ch1, ch2, figdir="figures", freq_corte_campana=5000, resi
     tension_r2     = measurement_r2(ch1.frecuencia, ch1.tension, tension_ajuste, tension_coefs)
     tension_chi2nu = measurement_chi2nu(ch1.frecuencia, ch1.tension, tension_ajuste, tension_coefs)
     # Reportar resultados
-    print("Valor de  la frecuencia de resonancia %f+-%f Hz"%(freq_resonancia, freq_resonancia_error))
-    print("Valor del factor de calidad %f+-%f"%(factor_calidad, factor_calidad_error))
-    print("Valor del coeficiente A %f+-%f V"%(coef_a, coef_a_error))
-    print("Valor del coeficiente B %f+-%f V"%(coef_b, coef_b_error))
-    print("Valor del R2 del ajuste de la tension %f"%(tension_r2))
-    print("Valor del chi2nu del ajuste de la tension %f"%(tension_chi2nu))
+    print("Valor de  la frecuencia de resonancia %f+-%f Hz" % (freq_resonancia, freq_resonancia_error))
+    print("Valor del factor de calidad %f+-%f" % (factor_calidad, factor_calidad_error))
+    print("Valor del coeficiente A %f+-%f V" % (coef_a, coef_a_error))
+    print("Valor del coeficiente B %f+-%f V" % (coef_b, coef_b_error))
+    print("Valor del R2 del ajuste de la tension %f" % (tension_r2))
+    print("Valor del chi2nu del ajuste de la tension %f" % (tension_chi2nu))
     print("--------------------------------------------------------------------------------------")
     freq_freq0 = measurement()
     freq_freq0.values = ch1.frecuencia.values / freq_resonancia
     freq_freq0.errors = ch1.frecuencia.errors / freq_resonancia
-    f_aux1 = lambda freq_freq0: tension_ajuste(freq_freq0 * freq_resonancia, *tension_coefs)
-    f_aux2 = lambda freq_freq0: fase_ajuste(freq_freq0 * freq_resonancia, *fase_coefs)
+
+    def f_aux1(ff0):
+        return tension_ajuste(ff0 * freq_resonancia, freq_resonancia, coef_a, factor_calidad)
+
+    def f_aux2(ff0):
+        return fase_ajuste(ff0 * freq_resonancia, coef_b)
+
     # Campana de la tension
     x_fit = np.linspace(freq_freq0.values[0], freq_freq0.values[indice_corte], 1000)
     y_fit = [f_aux1(f) for f in x_fit]
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Tension RMS [V]")
-    plot_fit(freq_freq0[:indice_corte], ch1.tension[:indice_corte], x_fit, y_fit, figdir+"/tension.pdf")
+    plot_fit(freq_freq0[:indice_corte], ch1.tension[:indice_corte], x_fit, y_fit, figdir + "/tension.pdf")
     # Diagrama de bode de la tension
     x_fit = np.logspace(np.log10(freq_freq0.values[0]), np.log10(freq_freq0.values[-1]), 1000)
     y_fit = [f_aux1(f) for f in x_fit]
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
-    plt.ylabel("Tension RMS [V]")  
-    plot_fit(freq_freq0, ch1.tension, x_fit, y_fit, figdir+"/tension_bode.pdf")
+    plt.xlabel(r"$f/f_0$")
+    plt.ylabel("Tension RMS [V]")
+    plot_fit(freq_freq0, ch1.tension, x_fit, y_fit, figdir + "/tension_bode.pdf")
     # Diagrama de bode de la potencia
     potencia = calc_potencia(ch1.tension, resistencia_carga)
-    potencia.values = (1000*np.array(potencia.values)).tolist()
-    potencia.errors = (1000*np.array(potencia.errors)).tolist()
-    y_fit = 1000*np.array(y_fit)**2/resistencia_carga
+    potencia.values = (1000 * np.array(potencia.values)).tolist()
+    potencia.errors = (1000 * np.array(potencia.errors)).tolist()
+    x_fit = np.logspace(-2, 3, 10_000)
+    y_fit = 1000* (f_aux1(x_fit))**2 / resistencia_carga
+    plt.ylim(-0.1, 1.6)
+    plt.xlim(10**(-2), 10**3)
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Potencia disipada [mW]")
-    plot_fit(freq_freq0, potencia, x_fit, y_fit, figdir+"/potencia.pdf")   
+    plot_fit(freq_freq0, potencia, x_fit, y_fit, figdir + "/potencia.pdf")
     # Campana de la fase
-    x_fit = np.linspace(freq_freq0.values[0], freq_freq0.values[indice_corte], 1000)
+    plt.ylim(-np.pi / 2, np.pi / 2)
+    plt.xlim(0, 2.5)
+    x_fit = np.linspace(0, 2.5, 10_000)
     y_fit = [f_aux2(f) for f in x_fit]
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Diferencia de fase [rad]")
-    plot_fit(freq_freq0[:indice_corte], ch1.fase[:indice_corte], x_fit, y_fit, figdir+"/fase.pdf")
+    plot_fit(freq_freq0[:indice_corte], ch1.fase[:indice_corte], x_fit, y_fit, figdir + "/fase.pdf")
     # Diagrama de bode de la fase
     x_fit = np.logspace(np.log10(freq_freq0.values[0]), np.log10(freq_freq0.values[-1]), 1000)
     y_fit = [f_aux2(f) for f in x_fit]
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Diferencia de fase [rad]")
-    plot_fit(freq_freq0, ch1.fase, x_fit, y_fit, figdir+"/fase_bode.pdf")
+    plot_fit(freq_freq0, ch1.fase, x_fit, y_fit, figdir + "/fase_bode.pdf")
     # Atenuacion:
+    plt.ylim(-0.5, 70.0)
+    plt.xlim(10**(-2), 10**3)
     tension_0 = np.max(ch2.tension.values)
     atenuacion = measurement()
-    atenuacion.values = (20*np.log10(tension_0 * np.array(ch1.tension.values)**(-1))).tolist()
-    atenuacion.errors = ((20/np.log(10)) * (np.array(ch1.tension.errors)/np.array(ch1.tension.values))).tolist()
-    x_fit = np.logspace(np.log10(freq_freq0.values[0]), np.log10(freq_freq0.values[-1]), 1000)
+    atenuacion.values = (20 * np.log10(tension_0 * np.array(ch1.tension.values)**(-1))).tolist()
+    atenuacion.errors = ((20 / np.log(10)) * (np.array(ch1.tension.errors) / np.array(ch1.tension.values))).tolist()
+    x_fit = np.logspace(-2, 3, 10_000)
     y_fit = [f_aux1(f) for f in x_fit]
-    y_fit = 20*np.log10(tension_0 * np.array(y_fit)**(-1))
+    y_fit = 20 * np.log10(tension_0 * np.array(y_fit)**(-1))
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Atenuacion [dB]")
-    plot_fit(freq_freq0, atenuacion, x_fit, y_fit, figdir+"/atenuacion.pdf")
+    plot_fit(freq_freq0, atenuacion, x_fit, y_fit, figdir + "/atenuacion.pdf")
 
 
 def rlc_paralelo_analisis(ch1, ch2, figdir="figures", freq_corte_campana=5000, resistencia_carga=0):
@@ -382,57 +394,59 @@ def rlc_paralelo_analisis(ch1, ch2, figdir="figures", freq_corte_campana=5000, r
     freq_freq0.errors = ch1.frecuencia.errors / freq_resonancia
 
     def f_aux1(freq_freq0):
-        tension_ajuste(freq_freq0 * freq_resonancia, *tension_coefs)
+        return tension_ajuste(freq_freq0 * freq_resonancia, *tension_coefs)
 
     def f_aux2(freq_freq0):
-        fase_ajuste(freq_freq0 * freq_resonancia, *fase_coefs)
+        return fase_ajuste(freq_freq0 * freq_resonancia, *fase_coefs)
     # Campana de la tension
     x_fit = np.linspace(freq_freq0.values[0], freq_freq0.values[indice_corte], 1000)
     y_fit = [f_aux1(x) for x in x_fit]
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Tension RMS [V]")
-    plot_fit(freq_freq0[:indice_corte], ch1.tension[:indice_corte], x_fit, y_fit, figdir+"/tension.pdf")
+    plot_fit(freq_freq0[:indice_corte], ch1.tension[:indice_corte], x_fit, y_fit, figdir + "/tension.pdf")
     # Diagrama de bode de la tension
     x_fit = np.logspace(np.log10(freq_freq0.values[0]), np.log10(freq_freq0.values[-1]), 1000)
     y_fit = [f_aux1(x) for x in x_fit]
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Tension RMS [V]")
-    plot_fit(freq_freq0, ch1.tension, x_fit, y_fit, figdir+"/tension_bode.pdf")
+    plot_fit(freq_freq0, ch1.tension, x_fit, y_fit, figdir + "/tension_bode.pdf")
     # Diagrama de bode de la potencia
     potencia = calc_potencia(ch1.tension, resistencia_carga)
-    potencia.values = (1000*np.array(potencia.values)).tolist()
-    potencia.errors = (1000*np.array(potencia.errors)).tolist()
-    y_fit = 1000*np.array(y_fit)**2/resistencia_carga
+    potencia.values = (1000 * np.array(potencia.values)).tolist()
+    potencia.errors = (1000 * np.array(potencia.errors)).tolist()
+    y_fit = 1000 * np.array(y_fit)**2 / resistencia_carga
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Potencia disipada [mW]")
-    plot_fit(freq_freq0, potencia, x_fit, y_fit, figdir+"/potencia.pdf")   
+    plot_fit(freq_freq0, potencia, x_fit, y_fit, figdir + "/potencia.pdf")
     # Campana de la fase
     x_fit = np.linspace(freq_freq0.values[0], freq_freq0.values[indice_corte], 1000)
     y_fit = [f_aux2(x) for x in x_fit]
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Diferencia de fase [rad]")
-    plot_fit(freq_freq0[:indice_corte], ch1.fase[:indice_corte], x_fit, y_fit, figdir+"/fase.pdf")
+    plot_fit(freq_freq0[:indice_corte], ch1.fase[:indice_corte], x_fit, y_fit, figdir + "/fase.pdf")
     # Diagrama de bode de la fase
+    # x_fit = np.logspace(np.log10(freq_freq0.values[0]), np.log10(freq_freq0.values[-1]), 1000)
+    # y_fit = [f_aux2(x) for x in x_fit]
     x_fit = []
     y_fit = []
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Diferencia de fase [rad]")
-    plot_fit(freq_freq0, ch1.fase, x_fit, y_fit, figdir+"/fase_bode.pdf")
+    plot_fit(freq_freq0, ch1.fase, x_fit, y_fit, figdir + "/fase_bode.pdf")
     # Atenuacion
     tension_0 = np.max(ch2.tension.values)
     atenuacion = measurement()
-    atenuacion.values = (20*np.log10(tension_0 * np.array(ch1.tension.values)**(-1))).tolist()
-    atenuacion.errors = ((20/np.log(10)) * (np.array(ch1.tension.errors)/np.array(ch1.tension.values))).tolist()
+    atenuacion.values = (20 * np.log10(tension_0 * np.array(ch1.tension.values)**(-1))).tolist()
+    atenuacion.errors = ((20 / np.log(10)) * (np.array(ch1.tension.errors) / np.array(ch1.tension.values))).tolist()
     x_fit = np.logspace(np.log10(freq_freq0.values[0]), np.log10(freq_freq0.values[-1]), 1000)
     y_fit = [f_aux1(f) for f in x_fit]
-    y_fit = 20*np.log10(tension_0 * np.array(y_fit)**(-1))
+    y_fit = 20 * np.log10(tension_0 * np.array(y_fit)**(-1))
     plt.xscale("log")
-    plt.xlabel(r"$\omega/\omega_0$")
+    plt.xlabel(r"$f/f_0$")
     plt.ylabel("Atenuacion [dB]")
-    plot_fit(freq_freq0, atenuacion, x_fit, y_fit, figdir+"/atenuacion.pdf")
+    plot_fit(freq_freq0, atenuacion, x_fit, y_fit, figdir + "/atenuacion.pdf")
 
 
 sb.set_theme()
@@ -473,10 +487,9 @@ dataset5_ch1.print_table()
 print("Mediciones Canal 2:")
 dataset5_ch2.print_table()
 
-rlc_serie_analisis(dataset1_ch1, dataset1_ch2, figdir = "figures1", resistencia_carga = 101)
-rlc_serie_analisis(dataset2_ch1, dataset2_ch2, figdir = "figures2", resistencia_carga = 1101)
-rlc_serie_analisis(dataset3_ch1, dataset3_ch2, figdir = "figures3", resistencia_carga = 10101)
+rlc_serie_analisis(dataset1_ch1, dataset1_ch2, figdir="figures1", resistencia_carga=101)
+rlc_serie_analisis(dataset2_ch1, dataset2_ch2, figdir="figures2", resistencia_carga=1101)
+rlc_serie_analisis(dataset3_ch1, dataset3_ch2, figdir="figures3", resistencia_carga=10101)
 
-rlc_paralelo_analisis(dataset4_ch1, dataset4_ch2, figdir = "figures4", freq_corte_campana = 2400, resistencia_carga = 1000)
-rlc_paralelo_analisis(dataset5_ch1, dataset5_ch2, figdir = "figures5", freq_corte_campana = 2400, resistencia_carga = 1000)
-
+rlc_paralelo_analisis(dataset4_ch1, dataset4_ch2, figdir="figures4", freq_corte_campana=2400, resistencia_carga=1000)
+rlc_paralelo_analisis(dataset5_ch1, dataset5_ch2, figdir="figures5", freq_corte_campana=2400, resistencia_carga=1000)
